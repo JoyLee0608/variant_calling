@@ -144,6 +144,7 @@ task call_gatk{
     }
     output {
         File rawVCF = "${sampleName}.raw.indels.snps.vcf.gz"
+        File rawVCFIndex = "${sampleName}.raw.indels.snps.vcf.gz.tbi"
     }
 }
 
