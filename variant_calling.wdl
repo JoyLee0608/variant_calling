@@ -68,8 +68,8 @@ task call_svaba{
         File RefIndex
         File RefDict
         String sampleName
-        File inputBAM
-        File bamIndex
+        String inputBAM
+        String bamIndex
         File INTERVAL
         Int NUM_THREAD = 8 
         String MEMORY = "70 GB"
@@ -80,8 +80,21 @@ task call_svaba{
         File Refsa
     }
     command {
+        set -e
+
+        mc alias set  \
+        bioisland-variation https://tos-s3.miracle.ac.cn  \
+        AKLTNmY1MTBhZmQ0MjBlNDg0YTgxZTkyZmU1MDgzNjMyZTA  \
+        TVRsa05USTVZekkxWTJKak5EZzJNbUl4T1RReU16STBOakkzWTJabE1EWQ==
+
+        mc cp  ${inputBAM} ${sampleName}.bam
+        mc cp  ${bamIndex} ${sampleName}.bai
+
+        md5sum ${sampleName}.bam ${sampleName}.bai >${sampleName}.md5
+
+
         svaba run \
-        -t ${inputBAM} \
+        -t ${sampleName}.bam \
         -p ${NUM_THREAD} \
         -a ${sampleName} \
         -G ${RefFasta} \
@@ -96,10 +109,10 @@ task call_svaba{
         ls ${sampleName}.svaba.unfiltered.sv.vcf
     }
     runtime {
-        docker: "registry.miracle.ac.cn/public/svaba:v1-python3-hczv1" 
+        docker: "registry.miracle.ac.cn/public/svaba:v1-python3-hczv2" 
         cpu: "${NUM_THREAD}" 
         memory: "${MEMORY}"
-        disk: "1 GB"
+        disk: "250 GB"
     }
     output {
         File log = "${sampleName}.log"
@@ -107,6 +120,7 @@ task call_svaba{
         File svVcf = "${sampleName}.svaba.sv.vcf"
         File unIndelVcf = "${sampleName}.svaba.unfiltered.indel.vcf"
         File unSvVcf = "${sampleName}.svaba.unfiltered.sv.vcf"
+        File md5 = "${sampleName}.md5"
     }
 }
 
@@ -119,17 +133,29 @@ task call_gatk{
         File RefIndex
         File RefDict
         String sampleName
-        File inputBAM
-        File bamIndex
+        String inputBAM
+        String bamIndex
         Int NUM_THREAD = 8
         String MEMORY = "50 GB"
 
     }
     command {
+        set -e
+        
+        mc alias set  \
+        bioisland-variation https://tos-s3.miracle.ac.cn  \
+        AKLTNmY1MTBhZmQ0MjBlNDg0YTgxZTkyZmU1MDgzNjMyZTA  \
+        TVRsa05USTVZekkxWTJKak5EZzJNbUl4T1RReU16STBOakkzWTJabE1EWQ==
+
+        mc cp  ${inputBAM} ${sampleName}.bam
+        mc cp  ${bamIndex} ${sampleName}.bai
+
+        md5sum ${sampleName}.bam ${sampleName}.bai >${sampleName}.md5
+
         gatk \
         HaplotypeCaller \
         -R ${RefFasta} \
-        -I ${inputBAM} \
+        -I ${sampleName}.bam \
         --emit-ref-confidence GVCF \
         --pair-hmm-implementation LOGLESS_CACHING \
         --native-pair-hmm-threads ${NUM_THREAD} \
@@ -137,14 +163,15 @@ task call_gatk{
         -O ${sampleName}.raw.indels.snps.vcf.gz
     }
     runtime {
-        docker: "registry.miracle.ac.cn/public/gatk:4.0.4.0" 
+        docker: "registry.miracle.ac.cn/public/gatk:4.0.4.0-hczv2" 
         cpu: "${NUM_THREAD}" 
         memory: "${MEMORY}"
-        disk: "1 GB"
+        disk: "250 GB"
     }
     output {
         File rawVCF = "${sampleName}.raw.indels.snps.vcf.gz"
         File rawVCFIndex = "${sampleName}.raw.indels.snps.vcf.gz.tbi"
+        File md5 = "${sampleName}.md5"
     }
 }
 
@@ -157,8 +184,8 @@ task call_MANTA{
         File RefIndex
         File RefDict
         String sampleName
-        File inputBAM
-        File bamIndex
+        String inputBAM
+        String bamIndex
         File MANTA_INTERVAL
         File MANTA_INTERVAL_index
         File Region
@@ -172,9 +199,21 @@ task call_MANTA{
         
     }
     command {
+        set -e
+        
+        mc alias set  \
+        bioisland-variation https://tos-s3.miracle.ac.cn  \
+        AKLTNmY1MTBhZmQ0MjBlNDg0YTgxZTkyZmU1MDgzNjMyZTA  \
+        TVRsa05USTVZekkxWTJKak5EZzJNbUl4T1RReU16STBOakkzWTJabE1EWQ==
+
+        mc cp  ${inputBAM} ${sampleName}.bam
+        mc cp  ${bamIndex} ${sampleName}.bai
+
+        md5sum ${sampleName}.bam ${sampleName}.bai >${sampleName}.md5
+
         # generate script and config
         configManta.py \
-        --bam  ${inputBAM} \
+        --bam  ${sampleName}.bam \
         --referenceFasta ${RefFasta} \
         --callRegions ${MANTA_INTERVAL} 
         
@@ -186,7 +225,7 @@ task call_MANTA{
         graphtyper genotype_sv \
         ${RefFasta} \
         MantaWorkflow/results/variants/diploidSV.vcf.gz \
-        --sam ${inputBAM} \
+        --sam ${sampleName}.bam \
         --region_file=${Region} \
         --threads=${NUM_THREAD}
 
@@ -216,10 +255,10 @@ task call_MANTA{
 
     }
     runtime {
-        docker: "registry.miracle.ac.cn/public/manta:v1-python2" 
+        docker: "registry.miracle.ac.cn/public/manta:v1-python2-hczv2" 
         cpu: "${NUM_THREAD}" 
         memory: "${MEMORY}"
-        disk: "1 GB"
+        disk: "250 GB"
 
     }
     output {
@@ -242,5 +281,6 @@ task call_MANTA{
         File errorLog = "${sampleName}.workflow.error.log.txt"
         File exitCode = "${sampleName}.workflow.exitcode.txt"
         File warningLog = "${sampleName}.workflow.warning.log.txt"
+        File md5 = "${sampleName}.md5"
     }
 }
