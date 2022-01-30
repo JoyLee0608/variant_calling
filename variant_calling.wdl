@@ -83,7 +83,7 @@ task call_svaba{
         set -e
 
         mc alias set  \
-        bioisland-variation https://tos-s3.miracle.ac.cn  \
+        bioisland-variation http://tos-s3-vpc.miracle.ac.cn  \
         AKLTNmY1MTBhZmQ0MjBlNDg0YTgxZTkyZmU1MDgzNjMyZTA  \
         TVRsa05USTVZekkxWTJKak5EZzJNbUl4T1RReU16STBOakkzWTJabE1EWQ==
 
@@ -143,7 +143,7 @@ task call_gatk{
         set -e
         
         mc alias set  \
-        bioisland-variation https://tos-s3.miracle.ac.cn  \
+        bioisland-variation http://tos-s3-vpc.miracle.ac.cn  \
         AKLTNmY1MTBhZmQ0MjBlNDg0YTgxZTkyZmU1MDgzNjMyZTA  \
         TVRsa05USTVZekkxWTJKak5EZzJNbUl4T1RReU16STBOakkzWTJabE1EWQ==
 
@@ -202,7 +202,7 @@ task call_MANTA{
         set -e
         
         mc alias set  \
-        bioisland-variation https://tos-s3.miracle.ac.cn  \
+        bioisland-variation http://tos-s3-vpc.miracle.ac.cn  \
         AKLTNmY1MTBhZmQ0MjBlNDg0YTgxZTkyZmU1MDgzNjMyZTA  \
         TVRsa05USTVZekkxWTJKak5EZzJNbUl4T1RReU16STBOakkzWTJabE1EWQ==
 
