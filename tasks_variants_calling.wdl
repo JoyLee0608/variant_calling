@@ -57,27 +57,20 @@ task call_GangSTR{
     }
 }
 
-task call_CNVnator{}
+
+
+
+task call_CNVnator{
     meta {
         description: "Call CNV using CNVnator"
     }
     input {
-        String docker = "registry-vpc.miracle.ac.cn/miracle_cloud/cnvnator:v1"
+        String docker = "registry-vpc.miracle.ac.cn/miracle_cloud/cnvnator:v1.1"
 
         String sampleName
         File inputBAM
+
         File bamIndex
-
-        File RefFasta
-        File RefIndex
-        File RefDict
-        File Refamb
-        File Refann
-        File Refbwt
-        File Refpac
-        File Refsa
-
-        # how to introduce a filepath with files under it. test for array
         Array[File] splitRefs
 
         Int NUM_THREAD = 5 
@@ -85,9 +78,12 @@ task call_CNVnator{}
         
     }
     command {
+        # copy splitRefs to cwd
+        cp ${sep = ' ' splitRefs} .
+
         # extracting reads from bam
         cnvnator -root ${sampleName}.root \
-        -chrom 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 \
+        -chrom chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 \
         -tree ${inputBAM}
 
         # Generating a read depth histogram
@@ -103,7 +99,7 @@ task call_CNVnator{}
         -partition 100
 
         # CNV calling
-        cnvnator -root ${sampleName}.root 
+        cnvnator -root ${sampleName}.root \
         -call 100 \
         > ${sampleName}.cnvnator
 
